@@ -153,13 +153,13 @@ A moderate seasonal swing survives even after controlling for the meteorological
 
 Out-of-fold predicted probabilities track the diagonal closely across the full range. This means that the model is ranking correctly (AUC) and also assigning genuinely well-calibrated probabilities (important, since the actual submission is a probability).
 
-Bin by bin, the biggest deviations from the diagonal are: a mild *underconfidence* around 0.15–0.25 predicted (observed rain rate ≈4–6 points higher than predicted there), and a mild *overconfidence* around 0.45–0.55 predicted (observed rate ≈6 points lower than predicted). Both sit in the thinnest bins (50–110 out-of-fold points each), so part of this is plausibly just noise rather than a systematic bias. The bin that matters most in practice — 0.9–1.0 predicted, which alone holds over half of all 2,190 out-of-fold predictions (1,127) — is close to perfectly calibrated (95.4% observed vs. 95.0% predicted), which is reassuring given how much of the dataset lives in that high-probability region (recall the 75%/25% rain/no-rain base rate).
+Some deviations are observable: a mild *underconfidence* around 0.15–0.25 predicted (observed rain rate ≈4–6 points higher than predicted there), and a mild *overconfidence* around 0.45–0.55 predicted (observed rate ≈6 points lower than predicted). Both in the thinnest bins (50–110 out-of-fold points each), so part of this is plausibly just noise rather than a systematic bias. The bin that matters most in practice — 0.9–1.0 predicted, which alone holds over half of all 2,190 out-of-fold predictions (1,127) — is close to perfectly calibrated (95.4% observed vs. 95.0% predicted), which is reassuring given how much of the dataset lives in that high-probability region (recall the 75%/25% rain/no-rain base rate).
 
 ### Posterior predictive check
 
 ![Posterior predictive check](tables_figures/diagnostics/pp_check_bars.png)
 
-The model's simulated 0/1 rainfall proportions (200 draws) closely match the observed counts.
+Each of the 1,000 posterior draws simulates a full rainfall dataset; the histogram shows the overall rain rate across those simulated datasets, and the vertical line marks the actually observed rate (0.753). The observed value sits right in the middle of the simulated distribution — the model isn't systematically over- or under-predicting how often it rains overall.
 
 ## 7. Kaggle result
 
