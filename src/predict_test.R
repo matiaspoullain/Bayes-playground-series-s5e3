@@ -1,10 +1,11 @@
 source("src/features.R")
 library(brms)
+library(data.table)
 
 fit <- readRDS("models/fit_full.rds")
 stats <- readRDS("models/fit_full_standardization_stats.rds")
-train_raw <- read.csv("data/raw/train.csv")
-test_raw <- read.csv("data/raw/test.csv")
+train_raw <- fread("data/raw/train.csv")
+test_raw <- fread("data/raw/test.csv")
 
 predictor_cols <- c("dewpoint_depression", "humidity", "cloud", "sunshine", "windspeed")
 pred_prob <- numeric(nrow(test_raw))
@@ -25,15 +26,15 @@ if (n_missing > 0) {
 }
 
 complete_idx <- which(!missing_wd)
-test_complete <- engineer_rainfall_features(test_raw[complete_idx, , drop = FALSE])
+test_complete <- engineer_rainfall_features(test_raw[complete_idx])
 test_complete_std <- standardize_predictors(test_complete, predictor_cols, stats = stats)$data
 pred_draws_complete <- posterior_epred(fit, newdata = test_complete_std)
 pred_prob[complete_idx] <- colMeans(pred_draws_complete)
 
 incomplete_idx <- which(missing_wd)
 for (i in incomplete_idx) {
-  row_expanded <- test_raw[rep(i, nrow(train_raw)), , drop = FALSE]
-  row_expanded$winddirection <- train_raw$winddirection
+  row_expanded <- test_raw[rep(i, nrow(train_raw))]
+  row_expanded[, winddirection := train_raw$winddirection]
   row_expanded <- engineer_rainfall_features(row_expanded)
   row_expanded_std <- standardize_predictors(row_expanded, predictor_cols, stats = stats)$data
 
@@ -44,10 +45,10 @@ for (i in incomplete_idx) {
 
 stopifnot("Predicted probabilities contain NA/missing values" = !anyNA(pred_prob))
 
-submission <- data.frame(id = test_raw$id, rainfall = pred_prob)
+submission <- data.table(id = test_raw$id, rainfall = pred_prob)
 
 dir.create("data/processed", showWarnings = FALSE, recursive = TRUE)
-write.csv(submission, "data/processed/submission.csv", row.names = FALSE)
+fwrite(submission, "data/processed/submission.csv")
 
 cat("Submission written: data/processed/submission.csv\n")
 cat("Predicted probability range: [", min(pred_prob), ",", max(pred_prob), "]\n")

@@ -1,8 +1,9 @@
 source("src/features.R")
 source("src/model_spec.R")
 library(brms)
+library(data.table)
 
-train <- read.csv("data/raw/train.csv")
+train <- fread("data/raw/train.csv")
 train <- engineer_rainfall_features(train)
 std <- standardize_predictors(
   train,

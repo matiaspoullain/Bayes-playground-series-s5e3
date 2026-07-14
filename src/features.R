@@ -1,24 +1,30 @@
+library(data.table)
+
 engineer_rainfall_features <- function(df) {
-  df$dewpoint_depression <- df$temparature - df$dewpoint
-  df$winddirection_sin <- sin(2 * pi * df$winddirection / 360)
-  df$winddirection_cos <- cos(2 * pi * df$winddirection / 360)
-  df
+  dt <- as.data.table(df)
+  dt[, `:=`(
+    dewpoint_depression = temparature - dewpoint,
+    winddirection_sin = sin(2 * pi * winddirection / 360),
+    winddirection_cos = cos(2 * pi * winddirection / 360)
+  )]
+  dt[]
 }
 
 standardize_predictors <- function(df, predictor_cols, stats = NULL) {
+  dt <- as.data.table(df)
+
   if (is.null(stats)) {
-    stats <- list()
-    for (col in predictor_cols) {
-      stats[[col]] <- list(mean = mean(df[[col]]), sd = sd(df[[col]]))
-    }
+    stats <- setNames(
+      lapply(predictor_cols, function(col) list(mean = mean(dt[[col]]), sd = sd(dt[[col]]))),
+      predictor_cols
+    )
   }
 
   for (col in predictor_cols) {
-    z_col <- paste0(col, "_z")
-    df[[z_col]] <- (df[[col]] - stats[[col]]$mean) / stats[[col]]$sd
+    set(dt, j = paste0(col, "_z"), value = (dt[[col]] - stats[[col]]$mean) / stats[[col]]$sd)
   }
 
-  list(data = df, stats = stats)
+  list(data = dt[], stats = stats)
 }
 
 make_year_folds <- function(id, rows_per_year = 365) {

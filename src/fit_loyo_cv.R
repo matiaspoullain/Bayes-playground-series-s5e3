@@ -2,8 +2,9 @@ source("src/features.R")
 source("src/model_spec.R")
 source("src/metrics.R")
 library(brms)
+library(data.table)
 
-train_raw <- read.csv("data/raw/train.csv")
+train_raw <- fread("data/raw/train.csv")
 train_raw <- engineer_rainfall_features(train_raw)
 
 folds <- make_year_folds(train_raw$id)
@@ -13,13 +14,13 @@ dir.create("models", showWarnings = FALSE)
 dir.create("tables_figures/cv", showWarnings = FALSE, recursive = TRUE)
 
 fold_summaries <- list()
-oof_predictions <- data.frame(
+oof_predictions <- data.table(
   id = train_raw$id, rainfall = train_raw$rainfall, oof_pred_prob = NA_real_
 )
 
 for (held_out_year in sort(unique(folds))) {
-  fit_data_raw <- train_raw[folds != held_out_year, ]
-  holdout_data_raw <- train_raw[folds == held_out_year, ]
+  fit_data_raw <- train_raw[folds != held_out_year]
+  holdout_data_raw <- train_raw[folds == held_out_year]
 
   std <- standardize_predictors(fit_data_raw, predictor_cols)
   fit_data <- std$data
@@ -40,15 +41,15 @@ for (held_out_year in sort(unique(folds))) {
 
   pred_draws <- posterior_epred(fit, newdata = holdout_data, allow_new_levels = TRUE)
   pred_prob <- colMeans(pred_draws)
-  oof_predictions$oof_pred_prob[folds == held_out_year] <- pred_prob
+  oof_predictions[folds == held_out_year, oof_pred_prob := pred_prob]
 
   summ <- summary(fit)
   rhats <- c(summ$fixed[, "Rhat"], summ$spec_pars[, "Rhat"])
   ess_bulk <- c(summ$fixed[, "Bulk_ESS"], summ$spec_pars[, "Bulk_ESS"])
-  divergences <- sum(subset(nuts_params(fit), Parameter == "divergent__")$Value)
+  divergences <- as.data.table(nuts_params(fit))[Parameter == "divergent__", sum(Value)]
 
   key <- as.character(held_out_year)
-  fold_summaries[[key]] <- data.frame(
+  fold_summaries[[key]] <- data.table(
     held_out_year = held_out_year,
     auc = auc(holdout_data$rainfall, pred_prob),
     brier = brier_score(holdout_data$rainfall, pred_prob),
@@ -64,9 +65,9 @@ for (held_out_year in sort(unique(folds))) {
   ))
 }
 
-cv_summary <- do.call(rbind, fold_summaries)
-write.csv(cv_summary, "tables_figures/cv/cv_summary.csv", row.names = FALSE)
-write.csv(oof_predictions, "tables_figures/cv/oof_predictions.csv", row.names = FALSE)
+cv_summary <- rbindlist(fold_summaries)
+fwrite(cv_summary, "tables_figures/cv/cv_summary.csv")
+fwrite(oof_predictions, "tables_figures/cv/oof_predictions.csv")
 
 cat("\nMean per-year AUC:", mean(cv_summary$auc), "SD:", sd(cv_summary$auc), "\n")
 cat("Pooled out-of-fold AUC:", auc(oof_predictions$rainfall, oof_predictions$oof_pred_prob), "\n")

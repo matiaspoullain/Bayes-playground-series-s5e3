@@ -1,8 +1,9 @@
 source("src/features.R")
 source("src/model_spec.R")
 library(brms)
+library(data.table)
 
-train_raw <- read.csv("data/raw/train.csv")
+train_raw <- fread("data/raw/train.csv")
 train_raw <- engineer_rainfall_features(train_raw)
 
 predictor_cols <- c("dewpoint_depression", "humidity", "cloud", "sunshine", "windspeed")

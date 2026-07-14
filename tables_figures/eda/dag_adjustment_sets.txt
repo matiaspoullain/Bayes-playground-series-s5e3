@@ -1,0 +1,50 @@
+- The project is out-of-sync -- use `renv::status()` for details.
+=== Adjustment sets for the DIRECT effect of each retained predictor on rainfall ===
+
+--- Exposure: dewpoint_depression -> rainfall (direct effect) ---
+  { cloud, day_of_year, humidity, winddirection, windspeed }
+  { day_of_year, humidity, pressure, windspeed }
+  { dewpoint, humidity, maxtemp, mintemp, pressure, temparature, windspeed }
+
+--- Exposure: humidity -> rainfall (direct effect) ---
+  { cloud, day_of_year, dewpoint_depression, winddirection, windspeed }
+  { cloud, dewpoint_depression, pressure, winddirection, windspeed }
+
+--- Exposure: cloud -> rainfall (direct effect) ---
+  { day_of_year, dewpoint_depression, humidity, sunshine, winddirection, windspeed }
+  { humidity, pressure, sunshine, winddirection }
+
+--- Exposure: sunshine -> rainfall (direct effect) ---
+  { cloud }
+
+--- Exposure: windspeed -> rainfall (direct effect) ---
+  { cloud, day_of_year, dewpoint_depression, humidity, winddirection }
+  { day_of_year, dewpoint_depression, humidity, pressure }
+
+--- Exposure: winddirection -> rainfall (direct effect) ---
+  { cloud, day_of_year, dewpoint_depression, humidity, windspeed }
+  { cloud, day_of_year, humidity, pressure }
+
+--- Exposure: day_of_year -> rainfall (direct effect) ---
+  { cloud, dewpoint_depression, humidity, winddirection, windspeed }
+  { dewpoint_depression, pressure, winddirection, windspeed }
+  { dewpoint, maxtemp, mintemp, pressure, temparature, winddirection, windspeed }
+
+=== Adjustment set for the joint direct effect of the whole chosen predictor set ===
+
+  {  }
+
+=== Comparison against the predictor set we actually chose ===
+Chosen predictors:   dewpoint_depression, humidity, cloud, sunshine, windspeed, winddirection, day_of_year 
+Excluded variables:  pressure, maxtemp, mintemp, temparature, dewpoint 
+
+Variables dagitty says are required beyond our chosen set:  none 
+
+=== Is each excluded variable ever UNAVOIDABLE (in every alternative set for some exposure)? ===
+(vs. merely appearing as one substitutable option among several valid sets)
+
+  pressure       unavoidable for some exposure: FALSE | appears as a substitutable alternative: TRUE
+  maxtemp        unavoidable for some exposure: FALSE | appears as a substitutable alternative: TRUE
+  mintemp        unavoidable for some exposure: FALSE | appears as a substitutable alternative: TRUE
+  temparature    unavoidable for some exposure: FALSE | appears as a substitutable alternative: TRUE
+  dewpoint       unavoidable for some exposure: FALSE | appears as a substitutable alternative: TRUE
