@@ -1,0 +1,47 @@
+[
+  {
+    "name": "sample_submission.csv",
+    "size": 5122,
+    "columns": [
+      "id",
+      "rainfall"
+    ]
+  },
+  {
+    "name": "test.csv",
+    "size": 43915,
+    "columns": [
+      "id",
+      "day",
+      "pressure",
+      "maxtemp",
+      "temparature",
+      "mintemp",
+      "dewpoint",
+      "humidity",
+      "cloud",
+      "sunshine",
+      "winddirection",
+      "windspeed"
+    ]
+  },
+  {
+    "name": "train.csv",
+    "size": 134758,
+    "columns": [
+      "id",
+      "day",
+      "pressure",
+      "maxtemp",
+      "temparature",
+      "mintemp",
+      "dewpoint",
+      "humidity",
+      "cloud",
+      "sunshine",
+      "winddirection",
+      "windspeed",
+      "rainfall"
+    ]
+  }
+]
